@@ -11,7 +11,6 @@ const EnvSchema = z.object({
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),
   PUBLIC_KEY : z.string().min(1,"PUBLIC_KEY is required"),
   NEXT_PUBLIC_TUDU_APP_FRONTEND_URL: z.string().url(),
-  NEXT_PUBLIC_APP_API_URL: z.string().url(),
 });
 
 const parsed = EnvSchema.safeParse(process.env);
