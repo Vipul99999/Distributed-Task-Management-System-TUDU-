@@ -357,6 +357,3 @@ Vipul Kumar Patel
 Computer Science Student
 Focused on Backend Systems, Distributed Architecture & Scalable Applications
 
-```
-
----
