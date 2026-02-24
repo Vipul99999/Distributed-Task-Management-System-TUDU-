@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Task {
+  id                 String           @id @default(uuid())
+  userId             String
+  title              String
+  date               DateTime?
+  dueDate            DateTime?
+  pinned             Boolean          @default(false)
+  isCompleted        Boolean          @default(false)
+  orderIndex         Float?
+  parentTaskId       String?
+  contextId          String?
+  lastSyncedAt       DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @default(now()) @updatedAt
+  recurrenceRule     String?
+  type               TaskType         @default(PERSONAL)
+  recurrence         TaskRecurrence   @default(NONE)
+  priority           TaskPriority     @default(MEDIUM)
+  parentTask         Task?            @relation("SubTasksRelational", fields: [parentTaskId], references: [id])
+  subTasksRelational Task[]           @relation("SubTasksRelational")
+  dependents         TaskDependency[] @relation("TaskDependsOn")
+  dependencies       TaskDependency[] @relation("TaskDependencies")
+  labels             TaskLabel[]
+  subtasks           TaskSubtask[]
+}
+
+model TaskSubtask {
+  id          String    @id @default(uuid())
+  taskId      String
+  title       String
+  isCompleted Boolean   @default(false)
+  orderIndex  Float?
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model TaskDependency {
+  id          String   @id @default(uuid())
+  taskId      String
+  dependsOnId String
+  createdAt   DateTime @default(now())
+  dependsOn   Task     @relation("TaskDependsOn", fields: [dependsOnId], references: [id], onDelete: Cascade)
+  task        Task     @relation("TaskDependencies", fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model Label {
+  id        String      @id @default(uuid())
+  userId    String
+  name      String
+  color     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now()) @updatedAt
+  tasks     TaskLabel[]
+
+  @@unique([userId, name])
+}
+
+model TaskLabel {
+  taskId  String
+  labelId String
+  label   Label  @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  task    Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, labelId])
+}
+
+
+
+// ----------------------
+// Improvement model
+// ----------------------
+model Improvement {
+  id          String      @id @default(cuid())
+  userId      String      // comes from JWT
+
+  text        String
+  futureNote  String?     // optional note about future benefit
+
+  category    Category?   @relation(fields: [categoryId], references: [id])
+  categoryId  String?
+
+  date        DateTime    @default(now()) // intended completion date
+  isCompleted Boolean     @default(false)
+
+  @@unique([userId, date]) // ensures one improvement per user per day
+}
+
+// ----------------------
+// Category model
+// ----------------------
+model Category {
+  id           String      @id @default(cuid())
+  userId       String      // comes from JWT
+
+  name         String
+  icon         String?
+  color        String?
+
+  improvements Improvement[]
+
+  @@unique([userId, name])
+}
+
+// ----------------------
+// Streak model
+// ----------------------
+model Streak {
+  id        String   @id @default(cuid())
+  userId    String   // comes from JWT
+
+  startDate DateTime
+  endDate   DateTime?
+  length    Int
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum TaskType {
+  PERSONAL
+  WORK
+  HABIT
+  TEMPLATE
+  OTHER
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskRecurrence {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
+}
+
+model TaskOrder {
+  userId    String @id       // primary key: one row per user
+  lastIndex Float  @default(0)
+}
+
+model TaskSubtaskOrder {
+  taskId    String @id       // primary key: one row per parent task
+  lastIndex Float  @default(0)
+}
