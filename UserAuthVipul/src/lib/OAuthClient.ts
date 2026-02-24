@@ -118,7 +118,7 @@ async function fetchToken(provider: OAuthProvider, code: string) {
 }
 
 // ---------------- Fetch OAuth user info & create JWT ----------------
-export async function fetchUser(provider: OAuthProvider, code: string, state: string, requestUrl?: string) {
+export async function fetchUser(provider: OAuthProvider, code: string, state: string) {
  
   const cookieStore = await cookies();
   const stateFromCookie = cookieStore.get(STATE_COOKIE_KEY)?.value;
