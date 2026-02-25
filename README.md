@@ -7,7 +7,7 @@ A cloud-deployed, service-separated task management platform built using modern 
 TUDU demonstrates modular backend architecture, secure authentication patterns, and production-style deployment across multiple cloud platforms.
 
 ---
-**Demo:** [Live Demo Link]()
+**Demo:** [Live Demo Link](https://distributed-tudu-user-auth.vercel.app/)
 
 ## 🚀 Overview
 
